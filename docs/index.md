@@ -10,6 +10,35 @@ To access Selcom API endpoints for services like Utility Payments, Wallet Cashin
 
 > Disclaimer: This documentation is presented "as is" without any guarantees. The author shall not be liable for any damages caused by the use of this code/documentation. See the MIT License for more details. The official documentation is available at [https://developers.selcommobile.com/](https://developers.selcommobile.com/).
 
+## Table of Content
+
+### Auth
+
+[Authentication](/Authentication)
+[Auth code examples](/auth)
+
+### Checkout API
+
+[Checkout API](/checkout-api)
+[Create Order doc](/create-order-doc)
+[Create Order full code](/create-order-full)
+[Create order minimal doc](/create-order-minimal-doc)
+[Create order minimal code](/create-order-minimal)
+[Cancel order](/cancel-order)
+[Delete stored card](/delete-stored-card)
+[Fetch stored card tokens](/fetch-stored-card-tokens)
+[Get order status](/get-order-status)
+[List orders](/list-orders)
+[Webhook callback](/webhook-callback)
+
+## Misc
+
+[Error codes](/error-codes)
+
+## Integrations
+
+[Node Selcom package](/node-selcom)
+
 ## Credits
 
 All the code is written by [Alpha Olomi](https://github.com/alphaolomi)
