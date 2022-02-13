@@ -8,37 +8,41 @@ Selcom offers a set of Application Programming Interfaces (APIs) that gives you 
 
 To access Selcom API endpoints for services like Utility Payments, Wallet Cashin and Qwiksend. One has to get in touch with our Teams (info@selcom.net). Our Developer Zone has language bindings in PHP, Java and Shell. Code examples are on the right side of the Panel, switching to different Programming language make use of the Tabs.
 
+<br>
+
 > Disclaimer: This documentation is presented "as is" without any guarantees. The author shall not be liable for any damages caused by the use of this code/documentation. See the MIT License for more details. The official documentation is available at [https://developers.selcommobile.com/](https://developers.selcommobile.com/).
 
-## Table of Content
+<br>
 
-### Auth
+#### Table of Content
 
-[Authentication](/Authentication)
-[Auth code examples](/auth)
+#### Auth
 
-### Checkout API
+- [Authentication](Authentication)
+- [Auth code examples](auth)
 
-[Checkout API](/checkout-api)
-[Create Order doc](/create-order-doc)
-[Create Order full code](/create-order-full)
-[Create order minimal doc](/create-order-minimal-doc)
-[Create order minimal code](/create-order-minimal)
-[Cancel order](/cancel-order)
-[Delete stored card](/delete-stored-card)
-[Fetch stored card tokens](/fetch-stored-card-tokens)
-[Get order status](/get-order-status)
-[List orders](/list-orders)
-[Webhook callback](/webhook-callback)
+#### Checkout API
 
-## Misc
+- [Checkout API](checkout-api)
+- [Create Order doc](create-order-doc)
+- [Create Order full code](create-order-full)
+- [Create order minimal doc](create-order-minimal-doc)
+- [Create order minimal code](create-order-minimal)
+- [Cancel order](cancel-order)
+- [Delete stored card](delete-stored-card)
+- [Fetch stored card tokens](fetch-stored-card-tokens)
+- [Get order status](get-order-status)
+- [List orders](list-orders)
+- [Webhook callback](webhook-callback)
 
-[Error codes](/error-codes)
+#### Misc
 
-## Integrations
+- [Error codes](error-codes)
 
-[Node Selcom package](/node-selcom)
+#### Integrations
 
-## Credits
+- [Node Selcom package](node-selcom)
 
-All the code is written by [Alpha Olomi](https://github.com/alphaolomi)
+<br><br><br>
+
+Written with 💖 by [Alpha Olomi](https://github.com/alphaolomi)
