@@ -98,3 +98,15 @@ export class WebhookParseError extends SelcomError {
     super("WEBHOOK_PARSE", message);
   }
 }
+
+/**
+ * The replay store failed (threw or rejected), so the delivery could not be checked. Answer with a
+ * 5xx so the gateway delivers again; do not treat it as a bad delivery.
+ */
+export class ReplayStoreError extends SelcomError {
+  constructor(cause?: unknown) {
+    super("REPLAY_STORE", "the replay store failed; answer with a 5xx so the delivery is retried", {
+      cause,
+    });
+  }
+}

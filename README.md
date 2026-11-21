@@ -222,7 +222,7 @@ app.post("/selcom/webhook/:token", express.raw({ type: "*/*" }), async (req, res
 | `INVALID` | 401 | No. Log it, redacted |
 | `STALE` | 401 | No. Log it, redacted |
 
-`VALID` vouches only for the fields named in `Signed-Fields`. `amount` is not one of them, so take the amount from `orderStatus`. Which key Selcom signs webhooks with is an open question in the spec (the samples assume your API secret). To find out in the sandbox, run in report-only mode: log the verdict, never reject. The verifier returns a verdict and never rejects anything itself. `parseWebhook` turns `amount` (`"10,000"`) into whole units (`amountTzs`) and ignores fields it does not know. `amount` is not signed, so a bad one never throws: you get `amountTzs: undefined` and `amountUnparsed: true`.
+`VALID` vouches only for the fields named in `Signed-Fields`. `amount` is not one of them, so take the amount from `orderStatus`. Which key Selcom signs webhooks with is an open question in the spec (the samples assume your API secret). To find out in the sandbox, run in report-only mode: log the verdict, never reject. The verifier returns a verdict and never rejects anything itself. If your `ReplayStore` fails, `verify` raises `ReplayStoreError` instead of a verdict: answer with a 5xx (the handler above does) so the gateway delivers again. `parseWebhook` turns `amount` (`"10,000"`) into whole units (`amountTzs`) and ignores fields it does not know. `amount` is not signed, so a bad one never throws: you get `amountTzs: undefined` and `amountUnparsed: true`.
 
 ## Signing on its own
 

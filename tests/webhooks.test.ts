@@ -5,6 +5,7 @@ import {
   MemoryReplayStore,
   parseTimestamp,
   parseWebhook,
+  ReplayStoreError,
   WebhookParseError,
   webhookResponse,
 } from "../src/index.js";
@@ -176,15 +177,28 @@ describe("webhook verification details", () => {
       const headers = { ...sample.headers, "Signed-Fields": "transid,a" };
       expect(await v.verify(headers, body)).toBe("INVALID");
     }
-    const throwing = verifier({
-      replayStore: {
+    expect(await v.verify(null as never, "{}")).toBe("INVALID");
+  });
+
+  it("raises ReplayStoreError when the replay store throws or rejects", async () => {
+    const stores = [
+      {
         seen: () => {
           throw new Error("store down");
         },
       },
-    });
-    expect(await throwing.verify(sample.headers, sample.raw_body)).toBe("INVALID");
-    expect(await v.verify(null as never, "{}")).toBe("INVALID");
+      { seen: () => Promise.reject(new Error("store down")) },
+    ];
+    for (const replayStore of stores) {
+      const error = await verifier({ replayStore })
+        .verify(sample.headers, sample.raw_body)
+        .catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(ReplayStoreError);
+      expect((error as ReplayStoreError).message).not.toContain("store down");
+    }
+    // Deliveries that never reach the store are still plain verdicts.
+    const down = verifier({ replayStore: stores[0] });
+    expect(await down.verify(sample.headers, "not json")).toBe("INVALID");
   });
 
   it("refuses to be built without a secret", () => {

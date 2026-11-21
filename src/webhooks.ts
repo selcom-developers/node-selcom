@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { ConfigError, SigningError, WebhookParseError } from "./errors.js";
+import { ConfigError, ReplayStoreError, SigningError, WebhookParseError } from "./errors.js";
 import {
   classifyPaymentStatus,
   normalizeResultCode,
@@ -63,7 +63,8 @@ export interface WebhookVerifierOptions {
 export interface WebhookVerifier {
   /**
    * Verifies one delivery. Pass the raw body exactly as received, as a string or a Buffer, before
-   * any framework parses or rewrites it. Resolves with a verdict; never throws for bad input.
+   * any framework parses or rewrites it. Resolves with a verdict and never throws for bad input. The one exception is `ReplayStoreError`,
+   * raised when the replay store itself fails: answer with a 5xx so the delivery is retried.
    */
   verify(headers: HeaderBag, rawBody: string | Uint8Array): Promise<WebhookVerdict>;
 }
@@ -88,8 +89,10 @@ export function createWebhookVerifier(options: WebhookVerifierOptions): WebhookV
     async verify(headers, rawBody) {
       try {
         return await check(headers, rawBody);
-      } catch {
-        // Verification never throws: any unexpected input is INVALID.
+      } catch (e) {
+        // A failing replay store is the merchant's 5xx, not a bad delivery.
+        if (e instanceof ReplayStoreError) throw e;
+        // Otherwise verification never throws: any unexpected input is INVALID.
         return "INVALID";
       }
     },
@@ -146,9 +149,17 @@ export function createWebhookVerifier(options: WebhookVerifierOptions): WebhookV
       if (Math.abs(nowMs - timestampMs) > windowSeconds * 1000) return "STALE";
 
       // 9. Replay.
-      if (await store.seen(digest, nowMs, Math.max(nowMs, timestampMs) + windowSeconds * 1000)) {
-        return "REPLAY";
+      let replayed: boolean;
+      try {
+        replayed = await store.seen(
+          digest,
+          nowMs,
+          Math.max(nowMs, timestampMs) + windowSeconds * 1000,
+        );
+      } catch (e) {
+        throw new ReplayStoreError(e);
       }
+      if (replayed) return "REPLAY";
       return "VALID";
     }
   }
