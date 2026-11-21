@@ -1,6 +1,6 @@
 {
   "name": "@selcom-developers/selcom",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Community TypeScript/Node client for the Selcom API gateway: signing, checkout, payouts and webhooks. Not affiliated with Selcom Paytech Ltd.",
   "keywords": [
     "selcom",
@@ -12,13 +12,13 @@
     "webhooks",
     "hmac"
   ],
-  "homepage": "https://github.com/selcom-developers/selcom-node#readme",
+  "homepage": "https://github.com/selcom-developers/node-selcom#readme",
   "bugs": {
-    "url": "https://github.com/selcom-developers/selcom-node/issues"
+    "url": "https://github.com/selcom-developers/node-selcom/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/selcom-developers/selcom-node.git"
+    "url": "git+https://github.com/selcom-developers/node-selcom.git"
   },
   "license": "Apache-2.0",
   "author": "The Selcom Developers community contributors",
