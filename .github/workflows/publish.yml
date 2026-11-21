@@ -1,0 +1,55 @@
+name: publish
+
+# Runs when a GitHub release is published (or by hand, from a tag ref).
+# Skipped unless the repository variable PUBLISH_ENABLED is set to "true".
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: publish to npm
+    if: vars.PUBLISH_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Release tag matches the package version
+        env:
+          TAG: ${{ github.event.release.tag_name || github.ref_name }}
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "$TAG" != "v$version" ]; then
+            echo "::error::tag '$TAG' does not match package version '$version'"
+            exit 1
+          fi
+      - run: npm ci
+      - name: Lint, test and build (prepublishOnly runs them again before publish)
+        run: |
+          npm run lint
+          npm run typecheck
+          npm test
+          npm run build
+      # Trusted publishing (OIDC) is used unless the NPM_TOKEN secret exists, in
+      # which case that token is used instead.
+      - name: Publish with trusted publishing
+        if: env.NPM_TOKEN == ''
+        run: npm publish --provenance --access public
+      - name: Publish with token
+        if: env.NPM_TOKEN != ''
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public
