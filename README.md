@@ -1,10 +1,11 @@
 # @selcom-developers/selcom
+[![CI](https://github.com/selcom-developers/selcom-node/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/selcom-developers/selcom-node/actions/workflows/ci.yml)
 
 Community TypeScript/Node client for the Selcom API gateway: request signing, checkout, payouts and webhooks. Zero runtime dependencies. Apache-2.0.
 
 > **Not affiliated with Selcom Paytech Ltd.** This is an independent community project. For API access, credentials, contracts and support, go to Selcom: <https://developers.selcommobile.com/>. Where this README and Selcom's portal disagree about the API itself, the portal wins.
 
-> **Version 0.1.0.** Install it as `@selcom-developers/selcom` (see below). The API may still change before 1.0.
+> Install it as `@selcom-developers/selcom` (see below). The API may still change before 1.0.
 
 Written from scratch against the shared [selcom-spec](https://github.com/selcom-developers/selcom-spec) (tag in [`SPEC_VERSION`](SPEC_VERSION)). The spec is the source of truth for signing, results and webhooks; this package passes every one of its test vectors.
 

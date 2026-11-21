@@ -25,8 +25,8 @@ First version. Built against selcom-spec v0.2.1.
 - Configuration with an explicit environment (`sandbox`, `production` or `custom`), no default, secrets kept out of `toString`, JSON and inspect, and per-profile timeouts.
 - A pure HS256 signer with a pluggable `Signer` interface: flattening, value rules, `Signed-Fields`, headers, percent-encoded query and flat JSON body.
 - A replaceable `Transport` interface with a default `fetch` implementation, `NOT_SENT` / `UNKNOWN_OUTCOME` classification, and a redacting `loggingTransport`.
-- 16 typed operations for checkout, wallet cash-in, utility payments and vendor balance. No automatic retry of payments or writes; opt-in retry of read-only operations after `NOT_SENT`.
-- Typed results with the five statuses (`SUCCESS`, `PENDING`, `AMBIGUOUS`, `FAILED`, `NOT_FOUND`), the raw HTTP status, body and decoded data.
+- Typed operations for checkout, wallet cash-in, utility payments and vendor balance. No automatic retry of payments or writes; opt-in retry of read-only operations after `NOT_SENT`.
+- Typed results with the statuses (`SUCCESS`, `PENDING`, `AMBIGUOUS`, `FAILED`, `NOT_FOUND`), the raw HTTP status, body and decoded data.
 - Webhook verification (`VALID`, `UNSIGNED`, `REPLAY`, `INVALID`, `STALE`) with a configurable window and replay store, and payload parsing with strict amount parsing.
 - Redaction helpers for headers, bodies, query strings and URLs.
 - Tests over every case and reject in `vectors/signing.json`, every scenario in `vectors/responses/`, and every webhook sample, from a copy of the spec vectors (`SPEC_VERSION`, `npm run sync-vectors`).
