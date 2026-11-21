@@ -1,0 +1,90 @@
+{
+  "operation": "walletcashin.namelookup",
+  "method": "GET",
+  "path": "/v1/walletcashin/namelookup",
+  "kind": "other",
+  "notes": "A lookup moves no money. Its 404 is a failed lookup, not NOT_FOUND.",
+  "scenarios": [
+    {
+      "name": "success",
+      "description": "Result code 000.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-CSH-0001",
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "SUCCESS",
+        "message": "Name fetch successful",
+        "data": [
+          {
+            "name": "TEST RECEIVER"
+          }
+        ]
+      },
+      "expected_status": "SUCCESS"
+    },
+    {
+      "name": "in-progress-111",
+      "description": "Result code 111: still processing. Query again after 3 minutes or more.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-CSH-0001",
+        "reference": "REF0000000001",
+        "resultcode": "111",
+        "result": "INPROGRESS",
+        "message": "Request in progress. You will receive a callback shortly.",
+        "data": []
+      },
+      "expected_status": "PENDING"
+    },
+    {
+      "name": "ambiguous-999",
+      "description": "Result code 999: outcome unknown, wait for reconciliation. Never resubmit.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-CSH-0001",
+        "reference": "REF0000000001",
+        "resultcode": "999",
+        "result": "AMBIGUOUS",
+        "message": "Transaction status unknown (sample)",
+        "data": []
+      },
+      "expected_status": "AMBIGUOUS"
+    },
+    {
+      "name": "failure",
+      "description": "Result code 400: any code outside 000, 111, 927, 999 (and 404 on a query) is a failure.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-CSH-0001",
+        "reference": "REF0000000001",
+        "resultcode": "400",
+        "result": "FAIL",
+        "message": "Wallet not found (sample)",
+        "data": []
+      },
+      "expected_status": "FAILED"
+    },
+    {
+      "name": "not-found-404",
+      "description": "Result code 404 on an operation that is not a status query is an ordinary failure, not NOT_FOUND.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-CSH-0001",
+        "reference": "REF0000000001",
+        "resultcode": "404",
+        "result": "FAIL",
+        "message": "Record not found (sample)",
+        "data": []
+      },
+      "expected_status": "FAILED"
+    },
+    {
+      "name": "gateway-error-no-json",
+      "description": "No JSON body and no result code on an operation that moves no money: raise an invalid-response error.",
+      "http_status": 502,
+      "raw_body": "<html><body><h1>502 Bad Gateway</h1></body></html>",
+      "expected_error": "INVALID_RESPONSE"
+    }
+  ]
+}

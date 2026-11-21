@@ -1,0 +1,297 @@
+{
+  "operation": "checkout.order-status",
+  "method": "GET",
+  "path": "/v1/checkout/order-status",
+  "kind": "order-status",
+  "notes": "The top-level resultcode only says whether the query worked. The payment verdict is data[0].payment_status.",
+  "scenarios": [
+    {
+      "name": "completed",
+      "description": "payment_status COMPLETED: paid. Payment fields are filled only on completed orders.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "SUCCESS",
+        "message": "Order fetch successful",
+        "data": [
+          {
+            "order_id": "ORD-1003",
+            "creation_date": "2026-11-21 10:30:00",
+            "amount": "5000",
+            "payment_status": "COMPLETED",
+            "transid": "TXN-WLT-0001",
+            "channel": "AIRTELMONEY",
+            "reference": "REF0000000201",
+            "phone": "255700000001"
+          }
+        ]
+      },
+      "expected_status": "SUCCESS"
+    },
+    {
+      "name": "completed-lowercase",
+      "description": "payment_status is compared case-insensitively.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "SUCCESS",
+        "message": "Order fetch successful",
+        "data": [
+          {
+            "order_id": "ORD-1003",
+            "creation_date": "2026-11-21 10:30:00",
+            "amount": "5000",
+            "payment_status": "completed",
+            "transid": "TXN-WLT-0001",
+            "channel": "AIRTELMONEY",
+            "reference": "REF0000000201",
+            "phone": "255700000001"
+          }
+        ]
+      },
+      "expected_status": "SUCCESS"
+    },
+    {
+      "name": "pending",
+      "description": "payment_status PENDING: not paid yet.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "SUCCESS",
+        "message": "Order fetch successful",
+        "data": [
+          {
+            "order_id": "ORD-1003",
+            "creation_date": "2026-11-21 10:30:00",
+            "amount": "5000",
+            "payment_status": "PENDING",
+            "transid": null,
+            "channel": null,
+            "reference": null,
+            "phone": null
+          }
+        ]
+      },
+      "expected_status": "PENDING"
+    },
+    {
+      "name": "inprogress",
+      "description": "payment_status INPROGRESS: a payment attempt is under way.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "SUCCESS",
+        "message": "Order fetch successful",
+        "data": [
+          {
+            "order_id": "ORD-1003",
+            "creation_date": "2026-11-21 10:30:00",
+            "amount": "5000",
+            "payment_status": "INPROGRESS",
+            "transid": null,
+            "channel": null,
+            "reference": null,
+            "phone": null
+          }
+        ]
+      },
+      "expected_status": "PENDING"
+    },
+    {
+      "name": "cancelled",
+      "description": "payment_status CANCELLED.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "SUCCESS",
+        "message": "Order fetch successful",
+        "data": [
+          {
+            "order_id": "ORD-1003",
+            "creation_date": "2026-11-21 10:30:00",
+            "amount": "5000",
+            "payment_status": "CANCELLED",
+            "transid": null,
+            "channel": null,
+            "reference": null,
+            "phone": null
+          }
+        ]
+      },
+      "expected_status": "FAILED"
+    },
+    {
+      "name": "usercancelled",
+      "description": "payment_status USERCANCELLED: the buyer cancelled on the payment page.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "SUCCESS",
+        "message": "Order fetch successful",
+        "data": [
+          {
+            "order_id": "ORD-1003",
+            "creation_date": "2026-11-21 10:30:00",
+            "amount": "5000",
+            "payment_status": "USERCANCELLED",
+            "transid": null,
+            "channel": null,
+            "reference": null,
+            "phone": null
+          }
+        ]
+      },
+      "expected_status": "FAILED"
+    },
+    {
+      "name": "usercanceled-one-l",
+      "description": "Accept the one-L spelling too.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "SUCCESS",
+        "message": "Order fetch successful",
+        "data": [
+          {
+            "order_id": "ORD-1003",
+            "creation_date": "2026-11-21 10:30:00",
+            "amount": "5000",
+            "payment_status": "USERCANCELED",
+            "transid": null,
+            "channel": null,
+            "reference": null,
+            "phone": null
+          }
+        ]
+      },
+      "expected_status": "FAILED"
+    },
+    {
+      "name": "rejected",
+      "description": "payment_status REJECTED: the attempt was declined.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "SUCCESS",
+        "message": "Order fetch successful",
+        "data": [
+          {
+            "order_id": "ORD-1003",
+            "creation_date": "2026-11-21 10:30:00",
+            "amount": "5000",
+            "payment_status": "REJECTED",
+            "transid": null,
+            "channel": null,
+            "reference": null,
+            "phone": null
+          }
+        ]
+      },
+      "expected_status": "FAILED"
+    },
+    {
+      "name": "unknown-payment-status",
+      "description": "A payment_status this spec does not list. Not a verdict: AMBIGUOUS.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "SUCCESS",
+        "message": "Order fetch successful",
+        "data": [
+          {
+            "order_id": "ORD-1003",
+            "creation_date": "2026-11-21 10:30:00",
+            "amount": "5000",
+            "payment_status": "SETTLING",
+            "transid": null,
+            "channel": null,
+            "reference": null,
+            "phone": null
+          }
+        ]
+      },
+      "expected_status": "AMBIGUOUS"
+    },
+    {
+      "name": "empty-data",
+      "description": "Result code 000 with no order in data: the order does not exist.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "SUCCESS",
+        "message": "Order fetch successful",
+        "data": []
+      },
+      "expected_status": "NOT_FOUND"
+    },
+    {
+      "name": "not-found-404",
+      "description": "Result code 404: the order does not exist.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "404",
+        "result": "FAIL",
+        "message": "Order not found (sample)",
+        "data": []
+      },
+      "expected_status": "NOT_FOUND"
+    },
+    {
+      "name": "query-in-progress-111",
+      "description": "The query itself returned 111.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "111",
+        "result": "INPROGRESS",
+        "message": "Request in progress (sample)",
+        "data": []
+      },
+      "expected_status": "PENDING"
+    },
+    {
+      "name": "query-ambiguous-999",
+      "description": "The query itself returned 999.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "999",
+        "result": "AMBIGUOUS",
+        "message": "Status unknown (sample)",
+        "data": []
+      },
+      "expected_status": "AMBIGUOUS"
+    },
+    {
+      "name": "query-rejected",
+      "description": "The query failed (here a made-up 403). That says nothing about the order: AMBIGUOUS, never FAILED.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "403",
+        "result": "FAIL",
+        "message": "Request rejected (sample)",
+        "data": []
+      },
+      "expected_status": "AMBIGUOUS"
+    },
+    {
+      "name": "gateway-error-no-json",
+      "description": "No JSON body. Not a verdict: AMBIGUOUS.",
+      "http_status": 502,
+      "raw_body": "<html><body><h1>502 Bad Gateway</h1></body></html>",
+      "expected_status": "AMBIGUOUS"
+    }
+  ]
+}

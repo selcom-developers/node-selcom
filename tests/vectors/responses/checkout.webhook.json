@@ -1,0 +1,231 @@
+{
+  "operation": "checkout.webhook",
+  "notes": "Process the samples in order with one replay store. Verification uses the secret below (the sample secret printed in Selcom's public docs), 'now' as the current time and a 300-second window. Which key Selcom really signs webhooks with is an open question: see docs/webhooks.md.",
+  "verification": {
+    "secret": "81dc9bdb52d04dc20036dbd8313ed055",
+    "now": "2026-11-21T10:31:00+03:00",
+    "window_seconds": 300
+  },
+  "samples": [
+    {
+      "name": "completed-signed",
+      "description": "A signed delivery for a completed payment. Verify, store, acknowledge, then confirm with order-status before fulfilling.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "u/h/Ix4sMp69scjQKUqYET/28BfOftik2YWhcX7IsDA=",
+        "Timestamp": "2026-11-21T10:30:46+03:00",
+        "Signed-Fields": "transid,order_id,reference,result,resultcode,payment_status"
+      },
+      "raw_body": "{\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"order_id\":\"ORD-2001\",\"transid\":\"TXN-WLT-2001\",\"reference\":\"REF0000002001\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10000\",\"phone\":\"255700000001\",\"payment_status\":\"COMPLETED\"}",
+      "expected_verification": "VALID",
+      "expected_amount_tzs": 10000
+    },
+    {
+      "name": "completed-signed-redelivered",
+      "description": "The same delivery again, byte for byte. Acknowledge with 200 and do nothing else.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "u/h/Ix4sMp69scjQKUqYET/28BfOftik2YWhcX7IsDA=",
+        "Timestamp": "2026-11-21T10:30:46+03:00",
+        "Signed-Fields": "transid,order_id,reference,result,resultcode,payment_status"
+      },
+      "raw_body": "{\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"order_id\":\"ORD-2001\",\"transid\":\"TXN-WLT-2001\",\"reference\":\"REF0000002001\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10000\",\"phone\":\"255700000001\",\"payment_status\":\"COMPLETED\"}",
+      "expected_verification": "REPLAY",
+      "expected_amount_tzs": 10000
+    },
+    {
+      "name": "amount-with-thousands-separator",
+      "description": "amount arrives as \"10,000\". Parse it as 10000 whole shillings.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "dkQLyJVajPB5Qpe4UmgS9d6pG4O47hWypqb/zSjr/gs=",
+        "Timestamp": "2026-11-21T10:30:46+03:00",
+        "Signed-Fields": "transid,order_id,reference,result,resultcode,payment_status"
+      },
+      "raw_body": "{\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"order_id\":\"ORD-2002\",\"transid\":\"TXN-WLT-2002\",\"reference\":\"REF0000002002\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10,000\",\"phone\":\"255700000001\",\"payment_status\":\"COMPLETED\"}",
+      "expected_verification": "VALID",
+      "expected_amount_tzs": 10000
+    },
+    {
+      "name": "unsigned-field-changed",
+      "description": "amount is not in Signed-Fields, so changing it does not break the signature. VALID vouches only for signed fields; take the amount from order-status.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "zHjQ3w5Jqj9HtSm2CsvDC20asiq46yKdu1cBtsrenTI=",
+        "Timestamp": "2026-11-21T10:30:46+03:00",
+        "Signed-Fields": "transid,order_id,reference,result,resultcode,payment_status"
+      },
+      "raw_body": "{\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"order_id\":\"ORD-2003\",\"transid\":\"TXN-WLT-2003\",\"reference\":\"REF0000002003\",\"channel\":\"AIRTELMONEY\",\"amount\":\"1\",\"phone\":\"255700000001\",\"payment_status\":\"COMPLETED\"}",
+      "expected_verification": "VALID",
+      "expected_amount_tzs": 1
+    },
+    {
+      "name": "signed-field-tampered",
+      "description": "Signed as PENDING, delivered as COMPLETED. Reject.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "Txue+EM3UhvJEmn5KFsOj0hs6/WT9RcN+UjKWdX4YAk=",
+        "Timestamp": "2026-11-21T10:30:46+03:00",
+        "Signed-Fields": "transid,order_id,reference,result,resultcode,payment_status"
+      },
+      "raw_body": "{\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"order_id\":\"ORD-2004\",\"transid\":\"TXN-WLT-2004\",\"reference\":\"REF0000002004\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10000\",\"phone\":\"255700000001\",\"payment_status\":\"COMPLETED\"}",
+      "expected_verification": "INVALID",
+      "expected_amount_tzs": 10000
+    },
+    {
+      "name": "wrong-secret",
+      "description": "Signed with a different secret. Reject.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "7FgKwMbpMZA0WNBexdyMPHoop/iNUAGlHxcPp8ZQ1yw=",
+        "Timestamp": "2026-11-21T10:30:46+03:00",
+        "Signed-Fields": "transid,order_id,reference,result,resultcode,payment_status"
+      },
+      "raw_body": "{\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"order_id\":\"ORD-2005\",\"transid\":\"TXN-WLT-2005\",\"reference\":\"REF0000002005\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10000\",\"phone\":\"255700000001\",\"payment_status\":\"COMPLETED\"}",
+      "expected_verification": "INVALID",
+      "expected_amount_tzs": 10000
+    },
+    {
+      "name": "stale-timestamp",
+      "description": "Correctly signed an hour before now, outside the 300-second window. Reject.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "UVDTKxURYXbGXrHvjKcYk3uYqDTp1ePcemAXJKwG/yM=",
+        "Timestamp": "2026-11-21T09:30:46+03:00",
+        "Signed-Fields": "transid,order_id,reference,result,resultcode,payment_status"
+      },
+      "raw_body": "{\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"order_id\":\"ORD-2006\",\"transid\":\"TXN-WLT-2006\",\"reference\":\"REF0000002006\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10000\",\"phone\":\"255700000001\",\"payment_status\":\"COMPLETED\"}",
+      "expected_verification": "STALE",
+      "expected_amount_tzs": 10000
+    },
+    {
+      "name": "signed-field-missing-from-body",
+      "description": "Signed-Fields names msisdn, which the body does not contain. Reject.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "tkrO0FLcz5ZAu0QDZILQRGn26gPfgbITb91GUUz8Tts=",
+        "Timestamp": "2026-11-21T10:30:46+03:00",
+        "Signed-Fields": "transid,order_id,reference,result,resultcode,payment_status,msisdn"
+      },
+      "raw_body": "{\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"order_id\":\"ORD-2007\",\"transid\":\"TXN-WLT-2007\",\"reference\":\"REF0000002007\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10000\",\"phone\":\"255700000001\",\"payment_status\":\"COMPLETED\"}",
+      "expected_verification": "INVALID",
+      "expected_amount_tzs": 10000
+    },
+    {
+      "name": "unsigned-delivery",
+      "description": "No Digest header. Nothing to verify: store it, acknowledge, and rely on order-status.",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "raw_body": "{\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"order_id\":\"ORD-2008\",\"transid\":\"TXN-WLT-2008\",\"reference\":\"REF0000002008\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10000\",\"phone\":\"255700000001\",\"payment_status\":\"COMPLETED\"}",
+      "expected_verification": "UNSIGNED",
+      "expected_amount_tzs": 10000
+    },
+    {
+      "name": "failed-payment-signed",
+      "description": "A valid delivery reporting a failed payment. The docs say webhooks come only for successes, so be ready for this anyway. It must not overturn a recorded SUCCESS.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "mHCD+85lznsrDqbisDYqUsEyiPuNTfXsb7JDiyfpmnw=",
+        "Timestamp": "2026-11-21T10:30:46+03:00",
+        "Signed-Fields": "transid,order_id,reference,result,resultcode,payment_status"
+      },
+      "raw_body": "{\"result\":\"FAIL\",\"resultcode\":\"400\",\"order_id\":\"ORD-2009\",\"transid\":\"TXN-WLT-2009\",\"reference\":\"REF0000002009\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10000\",\"phone\":\"255700000001\",\"payment_status\":\"CANCELLED\"}",
+      "expected_verification": "VALID",
+      "expected_amount_tzs": 10000
+    },
+    {
+      "name": "empty-digest-header",
+      "description": "Digest header present but empty. That is not an unsigned delivery: reject.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "",
+        "Timestamp": "2026-11-21T10:30:46+03:00",
+        "Signed-Fields": "transid,order_id,reference,result,resultcode,payment_status"
+      },
+      "raw_body": "{\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"order_id\":\"ORD-2010\",\"transid\":\"TXN-WLT-2010\",\"reference\":\"REF0000002010\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10000\",\"phone\":\"255700000001\",\"payment_status\":\"COMPLETED\"}",
+      "expected_verification": "INVALID",
+      "expected_amount_tzs": 10000
+    },
+    {
+      "name": "signed-fields-missing-order-id",
+      "description": "Correctly signed, but Signed-Fields leaves out order_id. INVALID.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "iKI3U6Y7gX5xLUGHntHCUC2brSQRnNfLxxwzeNv/u78=",
+        "Timestamp": "2026-11-21T10:30:46+03:00",
+        "Signed-Fields": "transid,reference,result,resultcode,payment_status"
+      },
+      "raw_body": "{\"transid\":\"TXN-WLT-2101\",\"order_id\":\"ORD-2101\",\"reference\":\"REF0000002101\",\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"payment_status\":\"COMPLETED\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10000\",\"phone\":\"255700000001\"}",
+      "expected_verification": "INVALID",
+      "expected_amount_tzs": 10000
+    },
+    {
+      "name": "signed-fields-missing-transid",
+      "description": "Correctly signed, but Signed-Fields leaves out transid. INVALID.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "RaRn9auB8nJMMGnehk9TTnqa1lQjPESFAprOwE64yCY=",
+        "Timestamp": "2026-11-21T10:30:46+03:00",
+        "Signed-Fields": "order_id,reference,result,resultcode,payment_status"
+      },
+      "raw_body": "{\"transid\":\"TXN-WLT-2101\",\"order_id\":\"ORD-2101\",\"reference\":\"REF0000002101\",\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"payment_status\":\"COMPLETED\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10000\",\"phone\":\"255700000001\"}",
+      "expected_verification": "INVALID",
+      "expected_amount_tzs": 10000
+    },
+    {
+      "name": "signed-value-with-ampersand",
+      "description": "Correctly signed, but a signed value contains '&'. INVALID.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "eP6DuS1sg6x/6Dz1+UDDRFj4GuS1vYahNrCyZ8j1MQo=",
+        "Timestamp": "2026-11-21T10:30:46+03:00",
+        "Signed-Fields": "transid,order_id,reference,result,resultcode,payment_status"
+      },
+      "raw_body": "{\"transid\":\"TXN-WLT-2101&x\",\"order_id\":\"ORD-2101\",\"reference\":\"REF0000002101\",\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"payment_status\":\"COMPLETED\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10000\",\"phone\":\"255700000001\"}",
+      "expected_verification": "INVALID",
+      "expected_amount_tzs": 10000
+    },
+    {
+      "name": "signed-field-name-with-ampersand",
+      "description": "Correctly signed, but a signed field name contains '&'. INVALID.",
+      "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "SELCOM MjAyY2I5NjJhYzU5MDc1Yjk2NGIwNzE1MmQyMzRiNzA=",
+        "Digest-Method": "HS256",
+        "Digest": "8sLwx+NeDcVWmNDtaU2r+KJTDU9v7ishJnh7NSwhCDo=",
+        "Timestamp": "2026-11-21T10:30:46+03:00",
+        "Signed-Fields": "transid,order_id,ref&x,result,resultcode,payment_status"
+      },
+      "raw_body": "{\"transid\":\"TXN-WLT-2101\",\"order_id\":\"ORD-2101\",\"ref&x\":\"REF0000002101\",\"result\":\"SUCCESS\",\"resultcode\":\"000\",\"payment_status\":\"COMPLETED\",\"channel\":\"AIRTELMONEY\",\"amount\":\"10000\",\"phone\":\"255700000001\"}",
+      "expected_verification": "INVALID",
+      "expected_amount_tzs": 10000
+    }
+  ]
+}

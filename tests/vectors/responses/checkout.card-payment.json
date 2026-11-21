@@ -1,0 +1,141 @@
+{
+  "operation": "checkout.card-payment",
+  "method": "POST",
+  "path": "/v1/checkout/card-payment",
+  "kind": "payment",
+  "notes": "Money-moving. Never retried automatically, even after a timeout. Settle every non-final result with order-status.",
+  "scenarios": [
+    {
+      "name": "accepted-111",
+      "description": "The usual answer: the charge is being processed. Wait for the webhook, then confirm with order-status.",
+      "http_status": 200,
+      "body": {
+        "reference": "REF0000000001",
+        "resultcode": "111",
+        "result": "PENDING",
+        "message": "Request in progress. You will receive a callback shortly.",
+        "data": []
+      },
+      "expected_status": "PENDING"
+    },
+    {
+      "name": "success",
+      "description": "Result code 000.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-CRD-0001",
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "SUCCESS",
+        "message": "Payment completed (sample)",
+        "data": []
+      },
+      "expected_status": "SUCCESS"
+    },
+    {
+      "name": "in-progress-111",
+      "description": "Result code 111: still processing. Query again after 3 minutes or more.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-CRD-0001",
+        "reference": "REF0000000001",
+        "resultcode": "111",
+        "result": "INPROGRESS",
+        "message": "Request in progress. You will receive a callback shortly.",
+        "data": []
+      },
+      "expected_status": "PENDING"
+    },
+    {
+      "name": "ambiguous-999",
+      "description": "Result code 999: outcome unknown, wait for reconciliation. Never resubmit.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-CRD-0001",
+        "reference": "REF0000000001",
+        "resultcode": "999",
+        "result": "AMBIGUOUS",
+        "message": "Transaction status unknown (sample)",
+        "data": []
+      },
+      "expected_status": "AMBIGUOUS"
+    },
+    {
+      "name": "failure",
+      "description": "Result code 400: any code outside 000, 111, 927, 999 (and 404 on a query) is a failure.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-CRD-0001",
+        "reference": "REF0000000001",
+        "resultcode": "400",
+        "result": "FAIL",
+        "message": "Card token not valid for this buyer (sample)",
+        "data": []
+      },
+      "expected_status": "FAILED"
+    },
+    {
+      "name": "not-found-404",
+      "description": "Result code 404 on an operation that is not a status query is an ordinary failure, not NOT_FOUND.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-CRD-0001",
+        "reference": "REF0000000001",
+        "resultcode": "404",
+        "result": "FAIL",
+        "message": "Record not found (sample)",
+        "data": []
+      },
+      "expected_status": "FAILED"
+    },
+    {
+      "name": "gateway-error-no-json",
+      "description": "No JSON body and no result code. Not a verdict: report AMBIGUOUS, never FAILED.",
+      "http_status": 502,
+      "raw_body": "<html><body><h1>502 Bad Gateway</h1></body></html>",
+      "expected_status": "AMBIGUOUS"
+    },
+    {
+      "name": "in-progress-927",
+      "description": "Result code 927 is also in progress.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-CRD-0001",
+        "reference": "REF0000000001",
+        "resultcode": "927",
+        "result": "INPROGRESS",
+        "message": "Transaction in progress (sample)",
+        "data": []
+      },
+      "expected_status": "PENDING"
+    },
+    {
+      "name": "success-blank-result",
+      "description": "Result code 000 with an empty result text is still a success. Classify by resultcode only.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-CRD-0001",
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "",
+        "message": "Transaction successful",
+        "data": []
+      },
+      "expected_status": "SUCCESS"
+    },
+    {
+      "name": "result-text-ignored",
+      "description": "The result text says SUCCESS but the code is 111. The code wins.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-CRD-0001",
+        "reference": "REF0000000001",
+        "resultcode": "111",
+        "result": "SUCCESS",
+        "message": "Request in progress (sample)",
+        "data": []
+      },
+      "expected_status": "PENDING"
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "operation": "utilitypayment.query",
+  "method": "GET",
+  "path": "/v1/utilitypayment/query",
+  "kind": "status-query",
+  "notes": "The resultcode is the verdict on the earlier payment. 404 means the gateway never recorded the transid: only then may the same transid be submitted again.",
+  "scenarios": [
+    {
+      "name": "success",
+      "description": "Result code 000.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-UTL-0001",
+        "reference": "REF0000000001",
+        "resultcode": "000",
+        "result": "SUCCESS",
+        "message": "Transaction successful",
+        "data": [
+          {
+            "receipt": "RCPT-TEST-0001"
+          }
+        ]
+      },
+      "expected_status": "SUCCESS"
+    },
+    {
+      "name": "in-progress-111",
+      "description": "Result code 111: still processing. Query again after 3 minutes or more.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-UTL-0001",
+        "reference": "REF0000000001",
+        "resultcode": "111",
+        "result": "INPROGRESS",
+        "message": "Request in progress. You will receive a callback shortly.",
+        "data": []
+      },
+      "expected_status": "PENDING"
+    },
+    {
+      "name": "ambiguous-999",
+      "description": "Result code 999: outcome unknown, wait for reconciliation. Never resubmit.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-UTL-0001",
+        "reference": "REF0000000001",
+        "resultcode": "999",
+        "result": "AMBIGUOUS",
+        "message": "Transaction status unknown (sample)",
+        "data": []
+      },
+      "expected_status": "AMBIGUOUS"
+    },
+    {
+      "name": "failure",
+      "description": "Result code 400: any code outside 000, 111, 927, 999 (and 404 on a query) is a failure.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-UTL-0001",
+        "reference": "REF0000000001",
+        "resultcode": "400",
+        "result": "FAIL",
+        "message": "Transaction failed (sample)",
+        "data": []
+      },
+      "expected_status": "FAILED"
+    },
+    {
+      "name": "not-found-404",
+      "description": "Result code 404 on a status query: the gateway has no record of this id.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-UTL-0001",
+        "reference": "REF0000000001",
+        "resultcode": "404",
+        "result": "FAIL",
+        "message": "Record not found (sample)",
+        "data": []
+      },
+      "expected_status": "NOT_FOUND"
+    },
+    {
+      "name": "gateway-error-no-json",
+      "description": "No JSON body and no result code. Not a verdict: report AMBIGUOUS, never FAILED.",
+      "http_status": 502,
+      "raw_body": "<html><body><h1>502 Bad Gateway</h1></body></html>",
+      "expected_status": "AMBIGUOUS"
+    },
+    {
+      "name": "numeric-resultcode",
+      "description": "resultcode sent as a JSON number. Normalise to a three-digit string before comparing.",
+      "http_status": 200,
+      "body": {
+        "transid": "TXN-UTL-0001",
+        "reference": "REF0000000001",
+        "resultcode": 0,
+        "result": "SUCCESS",
+        "message": "Transaction successful",
+        "data": []
+      },
+      "expected_status": "SUCCESS"
+    }
+  ]
+}
