@@ -3,15 +3,13 @@
 
 Community TypeScript/Node client for the Selcom API gateway: request signing, checkout, payouts and webhooks. Zero runtime dependencies. Apache-2.0.
 
-> **Not affiliated with Selcom Paytech Ltd.** This is an independent community project. For API access, credentials, contracts and support, go to Selcom: <https://developers.selcommobile.com/>. Where this README and Selcom's portal disagree about the API itself, the portal wins.
+Documentation: <https://selcom-developers.github.io/>
 
-## Design in one paragraph
-
-Every layer is usable on its own and replaceable: the **signer** is a pure function (no I/O, no clock), the **transport** is an interface you can swap (proxy, logging, your own HTTP client, a test fake), **operations** are plain specs you can run through `client.execute`, **results** carry the typed status plus the raw HTTP status and body, and **webhook verification** is a separate object. Nothing retries a payment or a write, ever.
+> **Not affiliated with Selcom Paytech Ltd.** For API access, credentials, contracts and support, go to Selcom: <https://developers.selcommobile.com/>.
 
 ## Install and requirements
 
-- Node 20 or later (CI runs 20, 22 and 24). It uses the global `fetch` and `node:crypto`; there are no runtime dependencies.
+- Node 20 or later. It uses the global `fetch` and `node:crypto`.
 - ESM and CommonJS are both supported, with type declarations.
 
 ```sh
@@ -69,7 +67,7 @@ new SelcomClient({
   fetch,                    // or just your own fetch for the default transport
   clock: () => new Date(),  // source of the Timestamp header
   timestampOffsetMinutes: 180, // default +03:00 (Africa/Dar_es_Salaam)
-  signer: (credentials) => hs256Signer(credentials.secret), // swap the digest step (RS256 later)
+  signer: (credentials) => hs256Signer(credentials.secret),
 });
 ```
 
@@ -100,7 +98,7 @@ One method per operation. Each returns an `OperationResult` and takes `{ signal 
 | `walletCashInQuery` | `walletcashin.query` | status-query |
 | `vendorBalance` | `vendor.balance` | read |
 
-Submitting and querying are separate methods: nothing hides a query inside a submit. The same operations are available as specs: `client.execute(operations.orderStatus, { orderId })`.
+The same operations are available as specs: `client.execute(operations.orderStatus, { orderId })`.
 
 Amounts are whole units of an explicit currency (a safe integer; never a float). Checkout takes `TZS` or `USD`; payouts are TZS only and refuse anything else. The client never invents buyer data: a missing required field raises `ValidationError`, before anything is signed or sent.
 
@@ -165,7 +163,7 @@ A `TransportError` says which of two things happened, and is never disguised as 
 
 The ID is the idempotency key: `transid` identifies a payout or payment attempt, `order_id` a checkout order. The gateway refuses a second transaction with an ID it has seen. The client is stateless: it does not lock, queue or deduplicate. That part is yours:
 
-1. **Generate IDs deterministically** from your own records (for example `"TXN-" + payoutRow.id`), so a crash and restart produces the same ID, not a new one. Keep them to 30 characters or fewer, using `A-Z a-z 0-9 -` (the gateway has not published its limits).
+1. **Generate IDs deterministically** from your own records (for example `"TXN-" + payoutRow.id`), so a crash and restart produces the same ID, not a new one. Keep them to 30 characters or fewer, using `A-Z a-z 0-9 -`.
 2. **Persist the ID with a "submitting" state before you call the gateway.** After a crash, reconcile anything left in that state by querying.
 3. **Put a unique constraint on the ID**, so a retried job cannot create a second transaction.
 4. **Settle `PENDING` and `AMBIGUOUS` by querying**: wait at least 3 minutes after the request, query with the same ID (`utilityQuery` or `walletCashInQuery` by `transid`; `orderStatus` by `orderId` for checkout), and repeat every 3 minutes for a window you choose. If it never settles, hand it to a person with the `transid` and `reference`.
@@ -288,4 +286,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). The rules this client follows are in the
 
 ## License
 
-[Apache License 2.0](LICENSE). Not affiliated with Selcom Paytech Ltd.
+[Apache License 2.0](LICENSE).
