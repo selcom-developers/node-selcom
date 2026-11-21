@@ -5,8 +5,6 @@ Community TypeScript/Node client for the Selcom API gateway: request signing, ch
 
 > **Not affiliated with Selcom Paytech Ltd.** This is an independent community project. For API access, credentials, contracts and support, go to Selcom: <https://developers.selcommobile.com/>. Where this README and Selcom's portal disagree about the API itself, the portal wins.
 
-> Install it as `@selcom-developers/selcom` (see below). The API may still change before 1.0.
-
 ## Design in one paragraph
 
 Every layer is usable on its own and replaceable: the **signer** is a pure function (no I/O, no clock), the **transport** is an interface you can swap (proxy, logging, your own HTTP client, a test fake), **operations** are plain specs you can run through `client.execute`, **results** carry the typed status plus the raw HTTP status and body, and **webhook verification** is a separate object. Nothing retries a payment or a write, ever.
