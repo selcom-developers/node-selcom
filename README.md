@@ -1,5 +1,5 @@
 # @selcom-developers/selcom
-[![CI](https://github.com/selcom-developers/node-selcom/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/selcom-developers/node-selcom/actions/workflows/ci.yml)
+[![CI](https://github.com/selcom-developers/selcom-node/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/selcom-developers/selcom-node/actions/workflows/ci.yml)
 
 Community TypeScript/Node client for the Selcom API gateway: request signing, checkout, payouts and webhooks. Zero runtime dependencies. Apache-2.0.
 

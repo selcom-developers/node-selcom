@@ -4,12 +4,6 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
-## [0.1.5] - 2026-11-21
-
-### Changed
-
-- The repository is now `selcom-developers/node-selcom`; links updated.
-
 ## [0.1.4] - 2026-11-21
 
 ### Changed
@@ -62,10 +56,9 @@ First version. Built against selcom-spec v0.2.1.
 - Adopt spec 0.2.1 webhook rules (steps 4, 5, 6 and 9): required signed fields, cheap bounded number handling, `&` check, replay expiry. Vectors refreshed to selcom-spec v0.2.1.
 - Only handshake and certificate failures are `NOT_SENT` among TLS errors; other TLS codes (including `ERR_SSL_WRONG_VERSION_NUMBER`) are `UNKNOWN_OUTCOME`.
 
-[Unreleased]: https://github.com/selcom-developers/node-selcom/compare/v0.1.5...HEAD
-[0.1.5]: https://github.com/selcom-developers/node-selcom/compare/v0.1.4...v0.1.5
-[0.1.4]: https://github.com/selcom-developers/node-selcom/compare/v0.1.3...v0.1.4
-[0.1.3]: https://github.com/selcom-developers/node-selcom/compare/v0.1.2...v0.1.3
-[0.1.2]: https://github.com/selcom-developers/node-selcom/compare/v0.1.1...v0.1.2
-[0.1.1]: https://github.com/selcom-developers/node-selcom/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/selcom-developers/node-selcom/releases/tag/v0.1.0
+[Unreleased]: https://github.com/selcom-developers/selcom-node/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/selcom-developers/selcom-node/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/selcom-developers/selcom-node/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/selcom-developers/selcom-node/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/selcom-developers/selcom-node/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/selcom-developers/selcom-node/releases/tag/v0.1.0
